@@ -324,6 +324,8 @@ prepare_container_image() {
     local base_image=$1
     local image_name=$2
     local container_tmp_Dockerfile
+    local container_default_user
+
     container_tmp_Dockerfile=$(mktemp Dockerfile.XXXXXX)
 
     cleanup_container_dockerfile() {
@@ -333,17 +335,18 @@ prepare_container_image() {
     trap cleanup_container_dockerfile RETURN
 
     docker pull "$base_image"
+    container_default_user=$(docker run --rm "$base_image" whoami)
     cat > "$container_tmp_Dockerfile" <<EOF
 FROM $base_image
 USER root
 RUN apt-get update && apt-get install -y sudo git jq build-essential cmake g++ clang bison flex libelf-dev libncurses5-dev python3-distutils zlib1g-dev python3 pkg-config libssl-dev
-RUN groupadd -f sudo \
-    && if ! id -u builduser >/dev/null 2>&1; then useradd -m -s /bin/bash builduser; fi \
-    && usermod -aG sudo builduser \
-    && echo 'builduser ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/builduser \
-    && chmod 0440 /etc/sudoers.d/builduser
-USER builduser
-ENV HOME=/home/builduser
+USER $container_default_user
+
+
+
+
+
+
 RUN git config --global pull.rebase false
 RUN git config --global advice.detachedHead false
 CMD ["bash", "wrt_core/build_container.sh", "$image_name"]
