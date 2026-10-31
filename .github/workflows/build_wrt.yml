@@ -140,6 +140,27 @@ jobs:
           REMOVE_CONFIG_FRAGMENTS: ${{ inputs.remove_fragments }}
         run: ./build.sh ${{ inputs.model }}
 
+      - name: Collect MWAN3 IPKs
+        if: ${{ inputs.model == 'jdcloud_ipq60xx_libwrt' }}
+        run: |
+          mkdir -p ./mwan3-ipk
+          for package in mwan3 luci-app-mwan3 luci-i18n-mwan3-zh-cn; do
+            package_file=$(find ./action_build/bin -type f -name "${package}_*.ipk" -print -quit)
+            if [ -z "$package_file" ]; then
+              echo "Missing IPK package: $package" >&2
+              exit 1
+            fi
+            cp -v "$package_file" ./mwan3-ipk/
+          done
+
+      - name: Upload MWAN3 IPKs
+        if: ${{ inputs.model == 'jdcloud_ipq60xx_libwrt' }}
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: ${{ env.BUILD_DATE }}_${{ inputs.model }}_mwan3-ipk
+          path: ./mwan3-ipk/*.ipk
+          if-no-files-found: error
+
       - name: Delete Old Cache
         run: |
           # 获取缓存列表并删除

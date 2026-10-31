@@ -61,6 +61,16 @@ GitHub Actions 的手动构建也提供 `add_fragments` 与 `remove_fragments` �
 
 编译完成后，脚本会从 `<BUILD_DIR>/bin/targets/` 收集固件文件到仓库根目录的 `firmware/`。每次完整构建前会清理旧的目标固件文件，`firmware/Packages.manifest` 会被移除。
 
+### GitHub Actions 下载 MWAN3 安装包
+
+在 `Build WRT` 或 `Release WRT` 工作流中选择 `jdcloud_ipq60xx_libwrt`，编译后会额外上传 `mwan3`、`luci-app-mwan3`、`luci-i18n-mwan3-zh-cn` 三个 IPK：
+
+- 两个工作流均可在运行详情页的 **Artifacts** 下载 `<构建时间>_jdcloud_ipq60xx_libwrt_mwan3-ipk`，解压后得到安装包。
+- `Release WRT` 还会将三个 IPK 分别添加到同次 Release 的 **Assets**，可直接下载。
+- 其他机型不执行这一步；所选机型缺少任意一个 IPK 时，工作流会报错。
+
+这些 IPK 来自同次固件构建，不包含额外依赖。安装到其他版本固件前，请先确认依赖和内核兼容性。
+
 ## 5. 支持设备
 
 设备配置名来自 `wrt_core/compilecfg/` 和 `wrt_core/deconfig/` 中同名文件。当前支持：
