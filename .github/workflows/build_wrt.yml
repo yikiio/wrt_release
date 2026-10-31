@@ -39,6 +39,10 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+permissions:
+  contents: read
+  actions: write
+
 jobs:
   build:
     strategy:
@@ -162,6 +166,8 @@ jobs:
           if-no-files-found: error
 
       - name: Delete Old Cache
+        # 缓存清理失败不应阻断后续固件上传。
+        continue-on-error: true
         run: |
           # 获取缓存列表并删除
           gh cache list --key ${{ matrix.os }}-${{ inputs.model }}-${{ hashFiles('**/repo_flag') }}- --json key --jq '.[] | .key' | while read -r key; do
